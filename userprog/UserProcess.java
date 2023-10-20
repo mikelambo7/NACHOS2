@@ -20,7 +20,8 @@ import java.io.EOFException;
  * @see nachos.network.NetProcess
  */
 public class UserProcess {
-	private static int activeProcesses = 0;
+	//The number of processes that are actively running.
+	private static int activeProcesses;
 
 	/**
 	 * Allocate a new process.
@@ -370,18 +371,18 @@ public class UserProcess {
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
 
-		// Free the memory used by the calling program
-		System.gc();
-
-		// End the Thread running the program
-		Thread.currentThread().interrupt();
-		System.out.println("Exiting the main Thread");
-
-		// Terminate only if it is the last process to call exit
-		if (activeProcesses == 1) {
+//		// Free the memory used by the calling program.
+//		System.gc();
+//
+//		// End the Thread running the program.
+//		Thread.currentThread().interrupt();
+//		System.out.println("Exiting the main Thread");
+//
+//		// Terminate only if it is the last process to call exit.
+//		if (activeProcesses == 1) {
 			Kernel.kernel.terminate();
-		}
-		activeProcesses--;
+//		}
+//		activeProcesses--;
 
 		return 0;
 	}
