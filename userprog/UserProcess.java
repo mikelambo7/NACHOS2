@@ -29,8 +29,29 @@ public class UserProcess {
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
-		for (int i = 0; i < numPhysPages; i++)
-			pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
+
+		for (int i = 0; i < numPhysPages; i++) {
+			if(pageTable[i] == null){
+				pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
+			}
+		}
+	}
+
+	/**
+	 * Return the first free page frame number.
+	 */
+	public int allocatePageFrame() {
+		int numPhysPages = Machine.processor().getNumPhysPages();
+
+		// Find a free page frame.
+		for (int i = 0; i < numPhysPages; i++) {
+			if (pageTable[i] == null) {
+				return i;
+			}
+		}
+
+		// No free page frames available.
+		return -1;
 	}
 
 	/**
@@ -310,10 +331,11 @@ public class UserProcess {
 					+ " section (" + section.getLength() + " pages)");
 
 			for (int i = 0; i < section.getLength(); i++) {
-				int vpn = section.getFirstVPN() + i;
-
+//				int vpn = section.getFirstVPN() + i;
 				// for now, just assume virtual addresses=physical addresses
-				section.loadPage(i, vpn);
+
+				// load page into any free memory frame.
+				section.loadPage(i, allocatePageFrame());
 			}
 		}
 
@@ -372,17 +394,17 @@ public class UserProcess {
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
 
 //		// Free the memory used by the calling program.
-//		System.gc();
+		System.gc();
 //
 //		// End the Thread running the program.
-//		Thread.currentThread().interrupt();
-//		System.out.println("Exiting the main Thread");
+		Thread.currentThread().interrupt();
+		System.out.println("Exiting the main Thread");
 //
 //		// Terminate only if it is the last process to call exit.
-//		if (activeProcesses == 1) {
+		if (activeProcesses == 1) {
 			Kernel.kernel.terminate();
-//		}
-//		activeProcesses--;
+		}
+		activeProcesses--;
 
 		return 0;
 	}
