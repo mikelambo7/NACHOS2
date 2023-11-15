@@ -442,14 +442,15 @@ public class UserProcess {
 	 */
 	public int handleSyscall(int syscall, int a0, int a1, int a2, int a3) {
 		switch (syscall) {
-		case syscallHalt:
-			return handleHalt();
-		case syscallExit:
-			return handleExit(a0);
-
-		default:
-			Lib.debug(dbgProcess, "Unknown syscall " + syscall);
-			Lib.assertNotReached("Unknown system call!");
+			case syscallHalt:
+				return handleHalt();
+			case syscallExit:
+				return handleExit(a0);
+			case syscallExec:
+				return handleExec(a0, a1, a2);
+			default:
+				Lib.debug(dbgProcess, "Unknown syscall " + syscall);
+				Lib.assertNotReached("Unknown system call!");
 		}
 		return 0;
 	}
@@ -481,6 +482,18 @@ public class UserProcess {
 			Lib.assertNotReached("Unexpected exception");
 		}
 	}
+	private int handleExec(int vaddr, int a1, int a2) {
+		String fileName = readVirtualMemoryString(vaddr);
+		String[] args = new String[0];
+	
+		if (execute(fileName, args)) {
+			return 0; // Success
+		} else {
+			return -1; // Error
+		}
+	}
+	
+
 
 	/** The program being run by this process. */
 	protected Coff coff;
