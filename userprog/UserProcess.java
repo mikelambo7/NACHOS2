@@ -28,13 +28,7 @@ public class UserProcess {
 	 */
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
-		pageTable = new TranslationEntry[numPhysPages];
-
-		for (int i = 0; i < numPhysPages; i++) {
-			if(pageTable[i] == null){
-				pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
-			}
-		}
+		pageTable = new TranslationEntry[numPhysPages];	
 	}
 
 	/**
@@ -321,6 +315,10 @@ public class UserProcess {
 			coff.close();
 			Lib.debug(dbgProcess, "\tinsufficient physical memory");
 			return false;
+		}
+
+		for (int i = 0; i < numPages; i++) {
+			pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
 		}
 
 		// load sections
