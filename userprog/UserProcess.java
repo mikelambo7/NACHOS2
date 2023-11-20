@@ -22,6 +22,7 @@ import java.io.EOFException;
 public class UserProcess {
 	//The number of processes that are actively running.
 	private static int activeProcesses;
+	private static MemoryBitmap freeList;
 
 	/**
 	 * Allocate a new process.
@@ -319,6 +320,7 @@ public class UserProcess {
 
 		for (int i = 0; i < numPages; i++) {
 			pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
+			freeList.allocatePage();
 		}
 
 		// load sections
@@ -392,7 +394,12 @@ public class UserProcess {
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
 
 //		// Free the memory used by the calling program.
-		System.gc();
+		for (int i = 0; i < pageTable.length; i++) {
+			if (pageTable[i] != null) {
+				freeList.deAllocatePage(pageTable[i].ppn);
+				pageTable[i] = null;
+			}
+		}
 //
 //		// End the Thread running the program.
 		Thread.currentThread().interrupt();
