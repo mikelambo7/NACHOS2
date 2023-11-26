@@ -29,12 +29,6 @@ public class UserProcess {
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
-
-		for (int i = 0; i < numPhysPages; i++) {
-			if(pageTable[i] == null){
-				pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
-			}
-		}
 	}
 
 	/**
@@ -323,6 +317,13 @@ public class UserProcess {
 			return false;
 		}
 
+		// Allocate only the number of pages needed by the program.
+		for (int i = 0; i < numPages; i++) {
+			if(pageTable[i] == null){
+				pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
+			}
+		}
+
 		// load sections
 		for (int s = 0; s < coff.getNumSections(); s++) {
 			CoffSection section = coff.getSection(s);
@@ -335,7 +336,12 @@ public class UserProcess {
 				// for now, just assume virtual addresses=physical addresses
 
 				// load page into any free memory frame.
-				section.loadPage(i, allocatePageFrame());
+				int freeMemoryFrame = allocatePageFrame();
+				if(freeMemoryFrame == -1){
+					return false;
+				} else{
+					section.loadPage(i, freeMemoryFrame);
+				}
 			}
 		}
 
@@ -394,8 +400,8 @@ public class UserProcess {
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
 
 //		// Free the memory used by the calling program.
-		System.gc();
-//
+		System.gc(); // NEED BUSY LIST
+
 //		// End the Thread running the program.
 		Thread.currentThread().interrupt();
 		System.out.println("Exiting the main Thread");
