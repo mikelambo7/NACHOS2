@@ -22,13 +22,14 @@ import java.io.EOFException;
 public class UserProcess {
 	//The number of processes that are actively running.
 	private static int activeProcesses;
+	private static MemoryBitmap freeList;
 
 	/**
 	 * Allocate a new process.
 	 */
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
-		pageTable = new TranslationEntry[numPhysPages];
+		pageTable = new TranslationEntry[numPhysPages];	
 	}
 
 	/**
@@ -317,11 +318,9 @@ public class UserProcess {
 			return false;
 		}
 
-		// Allocate only the number of pages needed by the program.
 		for (int i = 0; i < numPages; i++) {
-			if(pageTable[i] == null){
-				pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
-			}
+			pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
+			freeList.allocatePage();
 		}
 
 		// load sections
@@ -336,12 +335,7 @@ public class UserProcess {
 				// for now, just assume virtual addresses=physical addresses
 
 				// load page into any free memory frame.
-				int freeMemoryFrame = allocatePageFrame();
-				if(freeMemoryFrame == -1){
-					return false;
-				} else{
-					section.loadPage(i, freeMemoryFrame);
-				}
+				section.loadPage(i, allocatePageFrame());
 			}
 		}
 
@@ -400,8 +394,13 @@ public class UserProcess {
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
 
 //		// Free the memory used by the calling program.
-		System.gc(); // NEED BUSY LIST
-
+		for (int i = 0; i < pageTable.length; i++) {
+			if (pageTable[i] != null) {
+				freeList.deAllocatePage(pageTable[i].ppn);
+				pageTable[i] = null;
+			}
+		}
+//
 //		// End the Thread running the program.
 		Thread.currentThread().interrupt();
 		System.out.println("Exiting the main Thread");
