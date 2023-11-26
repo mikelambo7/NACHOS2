@@ -22,7 +22,7 @@ import java.io.EOFException;
 public class UserProcess {
 	//The number of processes that are actively running.
 	private static int activeProcesses;
-	private static MemoryBitmap freeList;
+	private static MemoryBitMap freeList;
 
 	/**
 	 * Allocate a new process.
@@ -319,8 +319,12 @@ public class UserProcess {
 		}
 
 		for (int i = 0; i < numPages; i++) {
-			pageTable[i] = new TranslationEntry(i, allocatePageFrame(), true, false, false, false);
-			freeList.allocatePage();
+			int freePageIndex = allocatePageFrame();
+			pageTable[i] = new TranslationEntry(i, freePageIndex, true, false, false, false);
+
+			if (freePageIndex != -1) {
+				freeList.allocatePage(freePageIndex);
+			}
 		}
 
 		// load sections
@@ -331,11 +335,14 @@ public class UserProcess {
 					+ " section (" + section.getLength() + " pages)");
 
 			for (int i = 0; i < section.getLength(); i++) {
-//				int vpn = section.getFirstVPN() + i;
-				// for now, just assume virtual addresses=physical addresses
-
 				// load page into any free memory frame.
-				section.loadPage(i, allocatePageFrame());
+				int freeMemoryFrame = allocatePageFrame();
+
+				if(freeMemoryFrame == -1){
+					return false;
+				} else{
+					section.loadPage(i, freeMemoryFrame);
+				}
 			}
 		}
 
@@ -393,19 +400,19 @@ public class UserProcess {
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
 
-//		// Free the memory used by the calling program.
+		// Free the memory used by the calling program.
 		for (int i = 0; i < pageTable.length; i++) {
 			if (pageTable[i] != null) {
 				freeList.deAllocatePage(pageTable[i].ppn);
 				pageTable[i] = null;
 			}
 		}
-//
-//		// End the Thread running the program.
+
+		// End the Thread running the program.
 		Thread.currentThread().interrupt();
 		System.out.println("Exiting the main Thread");
-//
-//		// Terminate only if it is the last process to call exit.
+
+		// Terminate only if it is the last process to call exit.
 		if (activeProcesses == 1) {
 			Kernel.kernel.terminate();
 		}

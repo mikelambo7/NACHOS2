@@ -1,3 +1,5 @@
+package nachos.userprog;
+
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,25 +16,27 @@ public class MemoryBitMap{
         }
     }
     public void allocatePage(int pageIndex){
-        semaphore.acquire();
         try{
+            semaphore.acquire();
             if(pageIndex<0 || pageIndex>=bitmap.length){
                 throw new IllegalArgumentException("Invalid page index");
             }
             bitmap[pageIndex] = 0;
-        }finally{
+        }catch (InterruptedException E) {}
+        finally{
             semaphore.release();
         }
     }
 
     public void deAllocatePage(int pageIndex){
-        semaphore.acquire();
         try{
+            semaphore.acquire();
             if(pageIndex<0 || pageIndex>=bitmap.length){
                 throw new IllegalArgumentException("Invalid page index");
             }
             bitmap[pageIndex] = 1;
-        } finally{
+        } catch (InterruptedException E) {}
+        finally{
             semaphore.release();
         }
     }
