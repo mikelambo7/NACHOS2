@@ -119,7 +119,7 @@ public class UserProcess {
 	 * @return the string read, or <tt>null</tt> if no null terminator was
 	 * found.
 	 */
-	public String readVirtualMemoryString(int vaddr, int maxLength) {
+	public static String readVirtualMemoryString(int vaddr, int maxLength) {
 		Lib.assertTrue(maxLength >= 0);
 
 		byte[] bytes = new byte[maxLength + 1];
@@ -142,7 +142,7 @@ public class UserProcess {
 	 * @param data the array where the data will be stored.
 	 * @return the number of bytes successfully transferred.
 	 */
-	public int readVirtualMemory(int vaddr, byte[] data) {
+	public static int readVirtualMemory(int vaddr, byte[] data) {
 		return readVirtualMemory(vaddr, data, 0, data.length);
 	}
 
@@ -160,7 +160,7 @@ public class UserProcess {
 	 * array.
 	 * @return the number of bytes successfully transferred.
 	 */
-	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+	public static int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -390,6 +390,23 @@ public class UserProcess {
 	}
 
 	/**
+	 * Handle the exec() system call.
+	 */
+	public static int handleExec(int vaddr, int a1, int a2) {
+		if (vaddr < 0) {
+			return -1;
+		}
+		String executableFileName = readVirtualMemoryString(vaddr,256);
+		if (executableFileName != null) {
+			String[] args = new String[0];
+			UserProcess process = UserProcess.newUserProcess();
+			process.execute(executableFileName, args);
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Handle the exit() system call.
 	 */
 	private int handleExit(int status) {
@@ -487,19 +504,23 @@ public class UserProcess {
 	 * @param a3 the fourth syscall argument.
 	 * @return the value to be returned to the user.
 	 */
+
 	public int handleSyscall(int syscall, int a0, int a1, int a2, int a3) {
 		switch (syscall) {
-		case syscallHalt:
-			return handleHalt();
-		case syscallExit:
-			return handleExit(a0);
+			case syscallHalt:
+				return handleHalt();
+			case syscallExit:
+				return handleExit(a0);
+			case syscallExec:
+				return handleExec(a3, a1, a2);
 
-		default:
-			Lib.debug(dbgProcess, "Unknown syscall " + syscall);
-			Lib.assertNotReached("Unknown system call!");
+			default:
+				Lib.debug(dbgProcess, "Unknown syscall " + syscall);
+				Lib.assertNotReached("Unknown system call!");
 		}
 		return 0;
 	}
+
 
 	/**
 	 * Handle a user exception. Called by <tt>UserKernel.exceptionHandler()</tt>

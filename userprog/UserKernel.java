@@ -22,7 +22,7 @@ public class UserKernel extends ThreadedKernel {
 	public void initialize(String[] args) {
 		super.initialize(args);
 		int numPhysPages = Machine.processor().getNumPhysPages();
-		MemoryBitMap = new MemoryBitMap(numPhysPages);
+		MemoryBitMap MemoryBitMap = new MemoryBitMap(numPhysPages);
 		console = new SynchConsole(Machine.console());
 
 		Machine.processor().setExceptionHandler(new Runnable() {
