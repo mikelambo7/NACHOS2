@@ -15,6 +15,7 @@ public class UserKernel extends ThreadedKernel {
 		super();
 	}
 
+	public static MemoryBitMap freeList;
 	/**
 	 * Initialize this kernel. Creates a synchronized console and sets the
 	 * processor's exception handler.
@@ -22,7 +23,7 @@ public class UserKernel extends ThreadedKernel {
 	public void initialize(String[] args) {
 		super.initialize(args);
 		int numPhysPages = Machine.processor().getNumPhysPages();
-		MemoryBitMap MemoryBitMap = new MemoryBitMap(numPhysPages);
+		freeList = new MemoryBitMap(numPhysPages);
 		console = new SynchConsole(Machine.console());
 
 		Machine.processor().setExceptionHandler(new Runnable() {

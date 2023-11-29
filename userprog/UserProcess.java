@@ -7,6 +7,8 @@ import nachos.vm.*;
 
 import java.io.EOFException;
 
+import static nachos.userprog.UserKernel.freeList;
+
 /**
  * Encapsulates the state of a user process that is not contained in its user
  * thread (or threads). This includes its address translation state, a file
@@ -22,7 +24,6 @@ import java.io.EOFException;
 public class UserProcess {
 	//The number of processes that are actively running.
 	private static int activeProcesses;
-	private static MemoryBitMap freeList;
 
 	/**
 	 * Allocate a new process.
@@ -396,7 +397,7 @@ public class UserProcess {
 		if (vaddr < 0) {
 			return -1;
 		}
-		String executableFileName = readVirtualMemoryString(vaddr,256);
+		String executableFileName = readVirtualMemoryString(vaddr,5000);
 		if (executableFileName != null) {
 			String[] args = new String[0];
 			UserProcess process = UserProcess.newUserProcess();
