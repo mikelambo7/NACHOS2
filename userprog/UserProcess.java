@@ -24,13 +24,15 @@ import static nachos.userprog.UserKernel.freeList;
 public class UserProcess {
 	//The number of processes that are actively running.
 	private static int activeProcesses;
+	private SynchConsole synchConsole;
 
 	/**
 	 * Allocate a new process.
 	 */
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
-		pageTable = new TranslationEntry[numPhysPages];	
+		pageTable = new TranslationEntry[numPhysPages];
+		synchConsole = new SynchConsole(Machine.console());
 	}
 
 	/**
@@ -515,12 +517,36 @@ public class UserProcess {
 				return handleExit(a0);
 			case syscallExec:
 				return handleExec(a3, a1, a2);
+			case syscallWrite:
+				return handleWrite(a0,a1, a2);
 
 			default:
 				Lib.debug(dbgProcess, "Unknown syscall " + syscall);
 				Lib.assertNotReached("Unknown system call!");
 		}
 		return 0;
+	}
+
+	public static final int CONSOLE_OUTPUT_FD = 1;
+
+	public int handleWrite(int fileDescriptor, int buffer, int size){
+		if (fileDescriptor != 1){
+			return -1;
+		}
+
+		byte[] localBuffer = new byte[size];
+		int bytesRead = readVirtualMemory(buffer, localBuffer);
+		if (bytesRead <= 0) {
+			// Handle error: failed to read from virtual memory
+			return -1;
+		}
+
+		// Write to the console
+		for (int i = 0; i < bytesRead; i++) {
+			synchConsole.writeByte(localBuffer[i]);
+		}
+
+		return bytesRead;
 	}
 
 
