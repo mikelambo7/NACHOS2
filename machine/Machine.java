@@ -12,7 +12,7 @@ import java.io.File;
  * constructs all simulated hardware devices, and starts the grader.
  */
 public final class Machine {
-	/**
+/**
 	 * Nachos main entry point.
 	 * 
 	 * @param args the command line arguments.
