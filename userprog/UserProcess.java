@@ -170,6 +170,12 @@ public class UserProcess {
 		byte[] memory = Machine.processor().getMemory();
 
 		// for now, just assume that virtual addresses equal physical addresses
+		for(int i = 0; i < pageTable.length; i++){
+			if(pageTable[i].vpn == vaddr){
+				vaddr = pageTable[i].ppn;
+			}
+		}
+
 		if (vaddr < 0 || vaddr >= memory.length)
 			return 0;
 
@@ -582,7 +588,7 @@ public class UserProcess {
 	protected Coff coff;
 
 	/** This process's page table. */
-	protected TranslationEntry[] pageTable;
+	protected static TranslationEntry[] pageTable;
 
 	/** The number of contiguous pages occupied by the program. */
 	protected int numPages;
