@@ -171,7 +171,7 @@ public class UserProcess {
 
 		// for now, just assume that virtual addresses equal physical addresses
 		for(int i = 0; i < pageTable.length; i++){
-			if(pageTable[i].vpn == vaddr){
+			if(pageTable[i] != null && pageTable[i].vpn == vaddr){
 				vaddr = pageTable[i].ppn;
 			}
 		}
@@ -349,7 +349,7 @@ public class UserProcess {
 
 				// Get corresponding ppn and load into segment
 				for(int j = 0; j < pageTable.length; j++){
-					if(pageTable[j].vpn == vpn){
+					if(pageTable[j] != null && pageTable[j].vpn == vpn){
 						section.loadPage(i, pageTable[j].ppn);
 					}
 				}
@@ -406,7 +406,7 @@ public class UserProcess {
 		if (vaddr < 0) {
 			return -1;
 		}
-		String executableFileName = readVirtualMemoryString(vaddr,256);
+		String executableFileName = readVirtualMemoryString(vaddr,5000);
 		if (executableFileName != null) {
 			String[] args = new String[0];
 			UserProcess process = UserProcess.newUserProcess();
