@@ -164,19 +164,17 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public static int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+		int vpn = vaddr/pageSize;
+		int ppn = pageTable[vpn].ppn;
+		int displacement = vaddr % pageSize;
+		int paddr = (ppn * pageSize) + displacement;
+
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
 		byte[] memory = Machine.processor().getMemory();
 
-		// for now, just assume that virtual addresses equal physical addresses
-		for(int i = 0; i < pageTable.length; i++){
-			if(pageTable[i] != null && pageTable[i].vpn == vaddr){
-				vaddr = pageTable[i].ppn;
-			}
-		}
-
-		if (vaddr < 0 || vaddr >= memory.length)
+		if (paddr < 0 || paddr >= memory.length)
 			return 0;
 
 		int amount = Math.min(length, memory.length - vaddr);
@@ -348,11 +346,7 @@ public class UserProcess {
 				int vpn = section.getFirstVPN() + i;
 
 				// Get corresponding ppn and load into segment
-				for(int j = 0; j < pageTable.length; j++){
-					if(pageTable[j] != null && pageTable[j].vpn == vpn){
-						section.loadPage(i, pageTable[j].ppn);
-					}
-				}
+				section.loadPage(i, pageTable[vpn].ppn);
 			}
 		}
 
