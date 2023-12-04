@@ -165,6 +165,10 @@ public class UserProcess {
 	 */
 	public static int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
 		int vpn = vaddr/pageSize;
+		if(pageTable[vpn] == null){
+			Lib.debug(dbgProcess, "\t\tPPN for VPN " + vpn + " is null");
+			return 0;
+		}
 		int ppn = pageTable[vpn].ppn;
 		int displacement = vaddr % pageSize;
 		int paddr = (ppn * pageSize) + displacement;
