@@ -26,9 +26,13 @@ public class UserKernel extends ThreadedKernel {
 		freeList = new MemoryBitMap(numPhysPages);
 		console = new SynchConsole(Machine.console());
 
+		System.out.println("Reached before exception");
+
 		Machine.processor().setExceptionHandler(new Runnable() {
 			public void run() {
+				System.out.println("Running Machine.processor");
 				exceptionHandler();
+				System.out.println("Past the exception!");
 			}
 		});
 	}

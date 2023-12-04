@@ -438,7 +438,8 @@ public class UserProcess {
 		System.out.println("Exiting the main Thread");
 
 		// Terminate only if it is the last process to call exit.
-		if (activeProcesses == 1) {
+		System.out.println("Active Processes " + activeProcesses);
+		if (activeProcesses == 0) {
 			Kernel.kernel.terminate();
 		}
 		activeProcesses--;
