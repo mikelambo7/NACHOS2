@@ -438,7 +438,7 @@ public class UserProcess {
 		System.out.println("Exiting the main Thread");
 
 		// Terminate only if it is the last process to call exit.
-		System.out.println("Active Processes " + activeProcesses);
+		System.out.println("Active Processes: " + activeProcesses);
 		if (activeProcesses == 0) {
 			Kernel.kernel.terminate();
 		}
@@ -523,6 +523,7 @@ public class UserProcess {
 			case syscallExec:
 				return handleExec(a3, a1, a2);
 			case syscallWrite:
+
 				return handleWrite(a0,a1, a2);
 
 			default:
@@ -541,6 +542,7 @@ public class UserProcess {
 
 		byte[] localBuffer = new byte[size];
 		int bytesRead = readVirtualMemory(buffer, localBuffer);
+		System.out.println("localbuffer: "+ localBuffer);
 		if (bytesRead <= 0) {
 			// Handle error: failed to read from virtual memory
 			return -1;
@@ -567,6 +569,7 @@ public class UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionSyscall:
+			System.out.println("Syscall in Processor.exception: " + processor.readRegister(Processor.regV0));
 			int result = handleSyscall(processor.readRegister(Processor.regV0),
 					processor.readRegister(Processor.regA0),
 					processor.readRegister(Processor.regA1),

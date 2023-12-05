@@ -956,6 +956,7 @@ public final class Processor {
 				break;
 
 			case Mips.SYSCALL:
+
 				throw new MipsException(exceptionSyscall);
 
 			case Mips.LOAD:
