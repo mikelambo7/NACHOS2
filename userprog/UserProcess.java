@@ -541,7 +541,7 @@ public class UserProcess {
 		}
 
 		byte[] localBuffer = new byte[size];
-		int bytesRead = readVirtualMemory(buffer, localBuffer);
+		int bytesRead = readVirtualMemory(buffer, localBuffer, 0, size);
 		System.out.println("localbuffer: "+ localBuffer);
 		if (bytesRead <= 0) {
 			// Handle error: failed to read from virtual memory
